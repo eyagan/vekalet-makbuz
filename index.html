@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vekalet Ücreti &amp; Serbest Meslek Makbuzu Hesaplama</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #ffffff;
+    --ink: #1e293b;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --brand: #1d4ed8;
+    --brand-dark: #1e3a8a;
+    --accent: #0d9488;
+    --danger: #dc2626;
+    --soft: #f1f5f9;
+    --net-bg: #ecfdf5;
+    --net-ink: #065f46;
+    --radius: 14px;
+    --shadow: 0 10px 30px rgba(15, 23, 42, .08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  /* [hidden], .line/.row gibi display kuralları tarafından ezilmesin diye güçlendirildi.
+     (.collapsible[hidden] daha yüksek özgüllükle block kalmaya devam eder.) */
+  [hidden] { display: none !important; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 38%, #334155 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 18px 60px; }
+
+  header.app { color: #fff; text-align: center; margin-bottom: 22px; }
+  header.app h1 { font-size: 1.55rem; margin: 0 0 6px; letter-spacing: -.01em; }
+  header.app p { margin: 0; color: #cbd5e1; font-size: .95rem; }
+  header.app .badge {
+    display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 999px;
+    background: rgba(255,255,255,.12); color: #e2e8f0; font-size: .78rem;
+    border: 1px solid rgba(255,255,255,.18);
+  }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 22px; border: 1px solid rgba(255,255,255,.6);
+  }
+  .card h2 {
+    font-size: 1.05rem; margin: 0 0 16px; display: flex; align-items: center; gap: 8px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--line);
+  }
+  .card h2 .ico { color: var(--brand); }
+
+  .field { margin-bottom: 18px; }
+  .field > label.lbl { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 8px; }
+  .hint { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+
+  .segmented { display: flex; gap: 8px; flex-wrap: wrap; }
+  .segmented label {
+    flex: 1 1 0; min-width: 130px; cursor: pointer; position: relative;
+  }
+  .segmented input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .segmented .opt {
+    display: block; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px;
+    font-size: .86rem; text-align: center; transition: all .15s ease; background: #fff;
+  }
+  .segmented .opt small { display: block; color: var(--muted); font-size: .72rem; margin-top: 2px; }
+  .segmented input:checked + .opt {
+    border-color: var(--brand); background: #eff6ff; color: var(--brand-dark); font-weight: 600;
+    box-shadow: 0 0 0 3px rgba(29,78,216,.10);
+  }
+  .segmented input:checked + .opt small { color: var(--brand); }
+  .segmented input:focus-visible + .opt { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .money-input { position: relative; }
+  .money-input input[type="text"] {
+    width: 100%; padding: 12px 14px 12px 40px; font-size: 1.1rem; font-weight: 600;
+    border: 1.5px solid var(--line); border-radius: 10px; color: var(--ink);
+    transition: border-color .15s; background: #fff;
+  }
+  .money-input input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(29,78,216,.10); }
+  .money-input .cur { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
+
+  /* Üç-alan giriş grubu (Net / Brüt / Tahsil) */
+  .triple-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .triple-fields { grid-template-columns: 1fr; } }
+  .triple-fields .field { margin-bottom: 0; }
+  .triple-fields .field > label.lbl { font-size: .78rem; }
+  .triple-fields .money-input input[type="text"] { font-size: .95rem; padding-left: 32px; }
+  .triple-fields .money-input .cur { font-size: .85rem; left: 10px; }
+  /* Aktif/sürücü alan vurgusu */
+  .money-input input.driver { border-color: var(--brand); background: #eff6ff; }
+
+  .check-row {
+    display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px;
+    border: 1.5px solid var(--line); border-radius: 10px; background: var(--soft);
+  }
+  .check-row input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--brand); cursor: pointer; }
+  .check-row label { font-size: .88rem; cursor: pointer; }
+
+  .collapsible { overflow: hidden; transition: max-height .25s ease, opacity .2s ease, margin .2s ease; }
+  .collapsible[hidden] { display: block !important; max-height: 0; opacity: 0; margin: 0 !important; }
+  .collapsible.open { max-height: 320px; opacity: 1; margin-top: 14px; }
+
+  details.adv { margin-top: 6px; border-top: 1px dashed var(--line); padding-top: 12px; }
+  details.adv summary { cursor: pointer; font-size: .85rem; color: var(--muted); font-weight: 600; }
+  .rate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px; }
+  @media (max-width: 520px) { .rate-grid { grid-template-columns: 1fr; } }
+  .rate-grid .field { margin: 0; }
+  .rate-grid input {
+    width: 100%; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 8px; font-size: .9rem;
+  }
+  .rate-grid label.lbl { font-size: .78rem; }
+
+  .nispi-out {
+    margin-top: 12px; padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe;
+    border-radius: 10px; font-size: .88rem; color: var(--brand-dark);
+  }
+  .nispi-out b { font-size: 1.05rem; }
+
+  /* Receipt */
+  .receipt { font-variant-numeric: tabular-nums; }
+  .rcpt-head {
+    text-align: center; padding-bottom: 14px; margin-bottom: 6px; border-bottom: 2px solid var(--ink);
+  }
+  .rcpt-head .t { font-weight: 700; letter-spacing: .03em; font-size: .95rem; }
+  .rcpt-head .s { font-size: .76rem; color: var(--muted); margin-top: 2px; }
+
+  .line {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 11px 2px; border-bottom: 1px dashed var(--line);
+  }
+  .line .k { color: var(--muted); font-size: .9rem; }
+  .line .k small { display: block; font-size: .72rem; color: #94a3b8; }
+  .line .v { font-weight: 600; font-size: 1rem; white-space: nowrap; }
+  .line.sub .k, .line.sub .v { color: var(--ink); font-weight: 600; }
+  .line.minus .v { color: var(--danger); }
+  .line.muted-row { opacity: .65; }
+
+  .net {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    margin-top: 14px; padding: 16px; border-radius: 12px;
+    background: var(--net-bg); border: 1.5px solid #6ee7b7;
+  }
+  .net .k { color: var(--net-ink); font-weight: 700; }
+  .net .v { color: var(--net-ink); font-weight: 800; font-size: 1.4rem; white-space: nowrap; }
+
+  .info-box {
+    margin-top: 14px; padding: 12px 14px; border-radius: 10px; font-size: .82rem;
+    background: var(--soft); color: var(--muted); border: 1px solid var(--line);
+  }
+  .info-box b { color: var(--ink); }
+  .info-box .row { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; }
+
+  /* Comparison */
+  .cmp { margin-top: 20px; }
+  table.cmp-tbl { width: 100%; border-collapse: collapse; font-size: .86rem; }
+  table.cmp-tbl th, table.cmp-tbl td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--line); }
+  table.cmp-tbl th:first-child, table.cmp-tbl td:first-child { text-align: left; color: var(--muted); }
+  table.cmp-tbl thead th { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: var(--brand-dark); border-bottom: 2px solid var(--line); }
+  table.cmp-tbl tbody tr.total td { font-weight: 700; color: var(--net-ink); border-top: 1px solid var(--line); }
+  table.cmp-tbl td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  footer.disc { margin-top: 24px; color: #cbd5e1; font-size: .78rem; text-align: center; line-height: 1.6; }
+  footer.disc a { color: #93c5fd; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app">
+    <h1>&#9878;&#65039; Vekalet Ücreti &amp; Serbest Meslek Makbuzu Hesaplama</h1>
+    <p>Avukatlık vekalet ücretini hesaplar, kesilecek serbest meslek makbuzunun dökümünü gösterir.</p>
+    <span class="badge">Güncel oranlar: AAÜT 2025–2026 · KDV %20 · Stopaj %20</span>
+  </header>
+
+  <div class="grid">
+    <!-- SOL: GİRDİ -->
+    <section class="card" aria-label="Girdiler">
+      <h2><span class="ico">&#9312;</span> Hesaplama Bilgileri</h2>
+
+      <!-- Ücret modu -->
+      <div class="field">
+        <label class="lbl">Vekalet ücreti nasıl belirlensin?</label>
+        <div class="segmented" id="mode">
+          <label>
+            <input type="radio" name="mode" value="nispi" checked />
+            <span class="opt">Dava değerinden<small>AAÜT nispi tarife</small></span>
+          </label>
+          <label>
+            <input type="radio" name="mode" value="manuel" />
+            <span class="opt">Elle gir<small>Net / Brüt / Tahsil</small></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Mod A: dava değeri -->
+      <div class="field" id="nispiField">
+        <label class="lbl" for="davaDegeri">Dava / alacak değeri</label>
+        <div class="money-input">
+          <span class="cur">₺</span>
+          <input type="text" id="davaDegeri" inputmode="numeric" placeholder="0" value="600.000" />
+        </div>
+        <div class="nispi-out" id="nispiOut">Hesaplanan net vekalet ücreti (matrah): <b>—</b></div>
+      </div>
+
+      <!-- Mod B: üç alan (Net / Brüt / Tahsil Edilen) -->
+      <div class="field" id="manuelField" hidden>
+        <label class="lbl">Tutar girişi — herhangi birini yazın, diğerleri otomatik hesaplanır</label>
+        <div class="triple-fields">
+          <div class="field">
+            <label class="lbl" for="inpNet">Net Ücret (matrah)</label>
+            <div class="money-input">
+              <span class="cur">₺</span>
+              <input type="text" id="inpNet" inputmode="numeric" placeholder="0" />
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl" for="inpBrut">Brüt (KDV dahil)</label>
+            <div class="money-input">
+              <span class="cur">₺</span>
+              <input type="text" id="inpBrut" inputmode="numeric" placeholder="0" />
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl" for="inpTahsil">Tahsil Edilen (hesaba gelen)</label>
+            <div class="money-input">
+              <span class="cur">₺</span>
+              <input type="text" id="inpTahsil" inputmode="numeric" placeholder="0" />
+            </div>
+          </div>
+        </div>
+        <div class="hint">KDV hesaba dahildir. Hangi alana yazarsanız, diğerleri o değere göre canlı hesaplanır.</div>
+      </div>
+
+      <!-- Ödeyen türü -->
+      <div class="field">
+        <label class="lbl">Ödeyen / müvekkil türü</label>
+        <div class="segmented" id="payer">
+          <label>
+            <input type="radio" name="payer" value="gercek" checked />
+            <span class="opt">Gerçek kişi (şahıs)<small>stopaj yok, KDV dahil</small></span>
+          </label>
+          <label>
+            <input type="radio" name="payer" value="tuzel" />
+            <span class="opt">Tüzel kişi (şirket)<small>stopaj kesilir</small></span>
+          </label>
+        </div>
+        <div class="hint">Gerçek kişide stopaj (gelir vergisi tevkifatı) uygulanmaz; tüzel kişide stopaj kesilir ve hesaba stopaj hariç, KDV dahil tutar gelir.</div>
+      </div>
+
+      <!-- KDV tevkifatı -->
+      <div class="field">
+        <div class="check-row">
+          <input type="checkbox" id="tevkifat" />
+          <label for="tevkifat"><b>KDV tevkifatı uygula</b> — tevkifatlı alıcı (kamu idaresi / belirlenmiş kurum-kuruluş). KDV dahil bedel 12.000 ₺'yi aşmalıdır.</label>
+        </div>
+        <div class="collapsible" id="tevkifatBox" hidden>
+          <label class="lbl" style="margin-top:4px;">Hizmet türü (tevkifat oranı)</label>
+          <div class="segmented" id="hizmet">
+            <label>
+              <input type="radio" name="hizmet" value="danismanlik" checked />
+              <span class="opt">Avukatlık / danışmanlık<small>9/10 tevkifat</small></span>
+            </label>
+            <label>
+              <input type="radio" name="hizmet" value="karsi" />
+              <span class="opt">Karşı taraf vekalet ücreti<small>5/10 tevkifat</small></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gelişmiş oranlar -->
+      <details class="adv">
+        <summary>Oranları düzenle (mevzuat değişirse)</summary>
+        <div class="rate-grid">
+          <div class="field">
+            <label class="lbl" for="kdvRate">KDV (%)</label>
+            <input type="text" id="kdvRate" inputmode="decimal" value="20" />
+          </div>
+          <div class="field">
+            <label class="lbl" for="stopajRate">Stopaj (%)</label>
+            <input type="text" id="stopajRate" inputmode="decimal" value="20" />
+          </div>
+          <div class="field">
+            <label class="lbl" for="esik">Tevkifat eşiği (₺)</label>
+            <input type="text" id="esik" inputmode="numeric" value="12.000" />
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SAĞ: MAKBUZ -->
+    <section class="card receipt" aria-label="Serbest Meslek Makbuzu">
+      <h2><span class="ico">&#9313;</span> Serbest Meslek Makbuzu</h2>
+      <div class="rcpt-head">
+        <div class="t">SERBEST MESLEK MAKBUZU (Önizleme)</div>
+        <div class="s" id="payerNote">Ödeyen: Gerçek kişi (şahıs)</div>
+      </div>
+
+      <!-- Makbuz satırları: Net → +KDV → =Brüt → −Stopaj → −KDVTevkifatı → =Tahsil -->
+      <div class="line sub">
+        <div class="k">Net Ücret (matrah / vergi hariç)</div>
+        <div class="v" id="rNet">—</div>
+      </div>
+      <div class="line">
+        <div class="k">+ Hesaplanan KDV <small id="kdvLbl">(%20)</small></div>
+        <div class="v" id="rKdv">—</div>
+      </div>
+      <div class="line sub">
+        <div class="k">= Brüt Ücret (KDV dahil)</div>
+        <div class="v" id="rBrut">—</div>
+      </div>
+      <div class="line minus" id="rowStopaj">
+        <div class="k">− Gelir Vergisi Stopajı <small id="stopajLbl">(%20)</small></div>
+        <div class="v" id="rStopaj">—</div>
+      </div>
+      <div class="line minus" id="rowTevkifat" hidden>
+        <div class="k">− KDV Tevkifatı <small id="tevkifatLbl">(9/10)</small></div>
+        <div class="v" id="rTevkifat">—</div>
+      </div>
+
+      <div class="net">
+        <div class="k">= Tahsil Edilen Tutar (hesaba gelen)</div>
+        <div class="v" id="rTahsil">—</div>
+      </div>
+
+      <div class="info-box" id="infoBox">
+        <div class="row" style="padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:4px;">
+          <span>&#8505; Bu makbuzda KDV ayrıca tahsil edilmez; tahsilat tutarına dahildir.</span>
+        </div>
+        <div class="row"><span>Avukatın beyan edeceği KDV</span><b id="iBeyanKdv">—</b></div>
+        <div class="row" id="iTevkifatRow" hidden><span>Alıcının tevkif ettiği KDV (sorumlu sıfatıyla)</span><b id="iTevkifat">—</b></div>
+      </div>
+
+      <!-- Karşılaştırma tablosu: aynı "Tahsil Edilen" için iki tür -->
+      <div class="cmp">
+        <table class="cmp-tbl">
+          <thead>
+            <tr><th>Aynı tahsilat için karşılaştırma</th><th>Gerçek kişi</th><th>Tüzel kişi</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Net Ücret</td><td class="num" id="cNetG">—</td><td class="num" id="cNetT">—</td></tr>
+            <tr><td>+ KDV</td><td class="num" id="cKdvG">—</td><td class="num" id="cKdvT">—</td></tr>
+            <tr><td>= Brüt</td><td class="num" id="cBrutG">—</td><td class="num" id="cBrutT">—</td></tr>
+            <tr><td>− Stopaj</td><td class="num" id="cStopajG">—</td><td class="num" id="cStopajT">—</td></tr>
+            <tr><td>− KDV Tevkifatı</td><td class="num" id="cTevkG">—</td><td class="num" id="cTevkT">—</td></tr>
+            <tr class="total"><td>= Tahsil Edilen</td><td class="num" id="cTahsilG">—</td><td class="num" id="cTahsilT">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <footer class="disc">
+    Bu araç yalnızca ön bilgilendirme amaçlıdır; kesin tutarlar için yürürlükteki mevzuat ve mali müşavirinizle teyit ediniz.<br>
+    Nispi tarife: <b>Avukatlık Asgari Ücret Tarifesi 2025–2026</b> (04.11.2025 tarihli, 33063 sayılı Resmî Gazete).
+  </footer>
+</div>
+
+<script>
+/* =========================================================================
+   YAPILANDIRMA — oranlar ve nispi tarife dilimleri tek yerde toplandı.
+   Mevzuat değişirse yalnızca burası güncellenir.
+   ========================================================================= */
+
+// Avukatlık Asgari Ücret Tarifesi 2025–2026 — nispi (oransal) dilimler.
+// her dilim: { limit: dilim genişliği (TL), oran: yüzde }  · son dilim limit: Infinity
+const NISPI_DILIMLER = [
+  { limit:   600000, oran: 16 },
+  { limit:   600000, oran: 15 },
+  { limit:  1200000, oran: 14 },
+  { limit:  1200000, oran: 13 },
+  { limit:  1800000, oran: 11 },
+  { limit:  2400000, oran:  8 },
+  { limit:  3000000, oran:  5 },
+  { limit:  3600000, oran:  3 },
+  { limit:  4200000, oran:  2 },
+  { limit: Infinity, oran:  1 },
+];
+
+/* =========================================================================
+   SAF HESAP FONKSİYONLARI (DOM'dan bağımsız — kolay test edilir)
+   ========================================================================= */
+
+/**
+ * Dava değerinden kademeli (progressive) nispi vekalet ücreti.
+ * Sonuç doğrudan Net (matrah) olarak kullanılır.
+ */
+function hesaplaNispiUcret(davaDegeri) {
+  let kalan = Math.max(0, davaDegeri);
+  let toplam = 0;
+  for (const d of NISPI_DILIMLER) {
+    if (kalan <= 0) break;
+    const dilim = Math.min(kalan, d.limit);
+    toplam += dilim * (d.oran / 100);
+    kalan -= dilim;
+  }
+  return toplam;
+}
+
+/**
+ * Net'ten tüm makbuz kalemlerini hesapla.
+ * @param {number} net - Vergi hariç matrah (Net Ücret)
+ * @param {Object} opt
+ * @param {string} opt.odeyen     - 'gercek' | 'tuzel'
+ * @param {boolean} opt.tevkifat  - KDV tevkifatı uygulanacak mı?
+ * @param {string} opt.hizmet     - 'danismanlik' (9/10) | 'karsi' (5/10)
+ * @param {number} opt.k          - KDV oranı (0.20)
+ * @param {number} opt.s          - Stopaj oranı (0.20)
+ * @param {number} opt.esik       - KDV tevkifat eşiği (12000)
+ * @returns {{net, kdv, brut, stopaj, kdvTevkifati, beyanKDV, tahsil, tevkifatOrani, tevkUygula}}
+ */
+function hesaplaFromNet(net, { odeyen, tevkifat, hizmet, k, s, esik }) {
+  if (!net || net < 0) net = 0;
+  const kdv = net * k;
+  const brut = net * (1 + k);                   // Brüt = Net × (1+k)
+  const stopaj = (odeyen === 'tuzel') ? net * s : 0;
+
+  const tevkifatOrani = (hizmet === 'karsi') ? 5 / 10 : 9 / 10;
+  const tevkUygula = !!(tevkifat && odeyen === 'tuzel' && brut > esik);
+  const kdvTevkifati = tevkUygula ? kdv * tevkifatOrani : 0;
+
+  const beyanKDV = kdv - kdvTevkifati;
+  // Tahsil Edilen = Net + BeyanKDV − Stopaj = Brüt − KDVTevkifatı − Stopaj
+  const tahsil = net + beyanKDV - stopaj;
+
+  return { net, kdv, brut, stopaj, kdvTevkifati, beyanKDV, tahsil, tevkifatOrani, tevkUygula };
+}
+
+/**
+ * Brüt'ten Net'e dönüşüm.
+ * Brüt her zaman Net×(1+k) — ödeyen türünden bağımsız.
+ */
+function netFromBrut(brut, { k }) {
+  return brut / (1 + k);
+}
+
+/**
+ * Tahsil Edilen'den Net'e geri hesaplama.
+ * Ödeyen türü ve tevkifat durumuna göre D katsayısı belirlenir.
+ * Eşik kontrolü: tevkifatlı D ile hesaplanan Brüt ≤ eşik ise tevkifatsız D kullanılır.
+ */
+function netFromTahsil(tahsil, { odeyen, tevkifat, hizmet, k, s, esik }) {
+  if (!tahsil || tahsil <= 0) return 0;
+  const r = (hizmet === 'karsi') ? 5 / 10 : 9 / 10;
+
+  if (odeyen === 'gercek') {
+    // Gerçek kişi: stopaj=0, tevkifat=0 → D = 1+k
+    return tahsil / (1 + k);
+  }
+
+  // Tüzel kişi
+  if (!tevkifat) {
+    // Tevkifatsız: D = 1+k-s
+    return tahsil / (1 + k - s);
+  }
+
+  // Tüzel + tevkifat: önce tevkifatlı D ile dene
+  const dTevk = 1 + k - k * r - s;
+  const netTevk = tahsil / dTevk;
+  const brutTevk = netTevk * (1 + k);
+  if (brutTevk > esik) {
+    // Brüt eşiği aşıyor → tevkifat gerçekten uygulanır
+    return netTevk;
+  }
+  // Brüt eşik altında → tevkifat uygulanmaz, tevkifatsız D
+  return tahsil / (1 + k - s);
+}
+
+/* =========================================================================
+   YARDIMCILAR
+   ========================================================================= */
+const fmtTRY = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 2 });
+const money = (n) => fmtTRY.format(isFinite(n) ? n : 0);
+
+// "1.234,56" / "1.234" gibi TR biçimli metinden sayı.
+function parseTR(str) {
+  if (typeof str !== 'string') return 0;
+  const cleaned = str.replace(/[^\d,]/g, '').replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+}
+
+// Yüzde alanları için nokta/virgül ondalık kabul eden basit parse.
+function parseNum(str) {
+  const n = parseFloat(String(str).replace(/\s/g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+// Para değerini TR biçiminde göster (binlik ayraç, ondalık yok)
+function fmtInput(n) {
+  if (!n && n !== 0) return '';
+  return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(n);
+}
+
+/* =========================================================================
+   DOM BAĞLAMA
+   ========================================================================= */
+const $ = (id) => document.getElementById(id);
+const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`).value;
+
+// Hangi manuel alanın "sürücü" (driver) olduğunu takip eder.
+// null = henüz belirlenmedi / 'net' | 'brut' | 'tahsil'
+let driver = null;
+
+/**
+ * Ana render fonksiyonu.
+ * driver: 'net' | 'brut' | 'tahsil' | null
+ */
+function render() {
+  const mode = getRadio('mode');
+  const odeyen = getRadio('payer');
+  const tevkifat = $('tevkifat').checked;
+  const hizmet = getRadio('hizmet');
+
+  const k = parseNum($('kdvRate').value) / 100;
+  const s = parseNum($('stopajRate').value) / 100;
+  const esik = parseTR($('esik').value);
+
+  const opt = { odeyen, tevkifat, hizmet, k, s, esik };
+
+  // Mod görünürlüğü
+  const nispi = mode === 'nispi';
+  $('nispiField').hidden = !nispi;
+  $('manuelField').hidden = nispi;
+
+  // Tevkifat kutusu görünürlüğü
+  const tb = $('tevkifatBox');
+  tb.hidden = !tevkifat;
+  tb.classList.toggle('open', tevkifat);
+
+  // Net'i belirle (hesap noktası)
+  let net;
+  if (nispi) {
+    const dava = parseTR($('davaDegeri').value);
+    net = hesaplaNispiUcret(dava);
+    $('nispiOut').innerHTML = 'Hesaplanan net vekalet ücreti (matrah): <b>' + money(net) + '</b>';
+    // Nispi modda manuel alanları güncelleme (gizli)
+    driver = null;
+  } else {
+    // Elle gir modu: driver alanına göre Net hesapla
+    if (driver === 'net') {
+      net = parseTR($('inpNet').value);
+    } else if (driver === 'brut') {
+      const brutVal = parseTR($('inpBrut').value);
+      net = netFromBrut(brutVal, { k });
+    } else if (driver === 'tahsil') {
+      const tahsilVal = parseTR($('inpTahsil').value);
+      net = netFromTahsil(tahsilVal, opt);
+    } else {
+      // Hiç yazılmamış — Net alanını varsayılan sürücü say
+      net = parseTR($('inpNet').value);
+    }
+  }
+
+  // Tüm kalemleri Net'ten hesapla
+  const r = hesaplaFromNet(net, opt);
+
+  // Elle gir modunda sürücü olmayan alanları güncelle
+  if (!nispi) {
+    if (driver !== 'net')    { $('inpNet').value    = r.net    > 0 ? fmtInput(r.net)    : ''; }
+    if (driver !== 'brut')   { $('inpBrut').value   = r.brut   > 0 ? fmtInput(r.brut)   : ''; }
+    if (driver !== 'tahsil') { $('inpTahsil').value = r.tahsil > 0 ? fmtInput(r.tahsil) : ''; }
+
+    // Driver vurgusu
+    ['inpNet', 'inpBrut', 'inpTahsil'].forEach((id) => {
+      const el = $(id);
+      const driverKey = id === 'inpNet' ? 'net' : id === 'inpBrut' ? 'brut' : 'tahsil';
+      el.classList.toggle('driver', driver === driverKey);
+    });
+  }
+
+  // Etiketler
+  $('kdvLbl').textContent = `(%${parseNum($('kdvRate').value)})`;
+  $('stopajLbl').textContent = `(%${parseNum($('stopajRate').value)})`;
+  $('tevkifatLbl').textContent = hizmet === 'karsi' ? '(5/10)' : '(9/10)';
+  $('payerNote').textContent = 'Ödeyen: ' + (odeyen === 'tuzel'
+    ? 'Tüzel kişi / vergi mükellefi (şirket)'
+    : 'Gerçek kişi (şahıs)');
+
+  // Makbuz satırları
+  $('rNet').textContent = money(r.net);
+  $('rKdv').textContent = money(r.kdv);
+  $('rBrut').textContent = money(r.brut);
+
+  const rowStopaj = $('rowStopaj');
+  if (odeyen === 'tuzel') {
+    rowStopaj.classList.remove('muted-row');
+    $('rStopaj').textContent = '− ' + money(r.stopaj);
+  } else {
+    rowStopaj.classList.add('muted-row');
+    $('rStopaj').textContent = money(0);
+  }
+
+  const rowTevkifat = $('rowTevkifat');
+  rowTevkifat.hidden = !r.tevkUygula;
+  $('rTevkifat').textContent = '− ' + money(r.kdvTevkifati);
+
+  $('rTahsil').textContent = money(r.tahsil);
+
+  // Bilgi kutusu
+  $('iBeyanKdv').textContent = money(r.beyanKDV);
+  const itr = $('iTevkifatRow');
+  itr.hidden = !r.tevkUygula;
+  $('iTevkifat').textContent = money(r.kdvTevkifati);
+
+  // Tevkifat işaretli ama eşik altıysa kullanıcıyı bilgilendir
+  if (tevkifat && !r.tevkUygula && odeyen === 'tuzel') {
+    $('tevkifatLbl').textContent = '(eşik altı — uygulanmadı)';
+  }
+
+  // Karşılaştırma tablosu: aynı "Tahsil Edilen" için iki ödeyen türü karşılaştır.
+  // Tahsil sabit, gerçek ve tüzel için net geri hesaplanır.
+  const tahsilSabit = r.tahsil;
+  const netG = netFromTahsil(tahsilSabit, { ...opt, odeyen: 'gercek' });
+  const netT = netFromTahsil(tahsilSabit, { ...opt, odeyen: 'tuzel' });
+  const g = hesaplaFromNet(netG, { ...opt, odeyen: 'gercek' });
+  const t = hesaplaFromNet(netT, { ...opt, odeyen: 'tuzel' });
+
+  $('cNetG').textContent   = money(g.net);        $('cNetT').textContent   = money(t.net);
+  $('cKdvG').textContent   = money(g.kdv);        $('cKdvT').textContent   = money(t.kdv);
+  $('cBrutG').textContent  = money(g.brut);       $('cBrutT').textContent  = money(t.brut);
+  $('cStopajG').textContent = money(g.stopaj);    $('cStopajT').textContent = money(t.stopaj);
+  $('cTevkG').textContent  = money(g.kdvTevkifati); $('cTevkT').textContent  = money(t.kdvTevkifati);
+  $('cTahsilG').textContent = money(g.tahsil);    $('cTahsilT').textContent = money(t.tahsil);
+}
+
+/* =========================================================================
+   PARA ALANI BİÇİMLENDİRME (binlik ayraç, TR)
+   ========================================================================= */
+function attachMoneyFormat(el) {
+  el.addEventListener('input', () => {
+    const caretEnd = el.selectionStart === el.value.length;
+    // Ondalık yazımına izin ver: sonu virgülle bitiyorsa biçimlemeyi atla
+    if (/[,]\d{0,2}$/.test(el.value) || el.value.endsWith(',')) { render(); return; }
+    const n = parseTR(el.value);
+    el.value = n ? fmtInput(n) : '';
+    if (caretEnd) el.setSelectionRange(el.value.length, el.value.length);
+    render();
+  });
+}
+
+/* =========================================================================
+   OLAY BAĞLAMA
+   ========================================================================= */
+
+// Nispi mod — dava değeri
+attachMoneyFormat($('davaDegeri'));
+
+// Manuel mod üç alan — driver takibi + biçimleme
+[
+  { id: 'inpNet',    key: 'net'    },
+  { id: 'inpBrut',   key: 'brut'   },
+  { id: 'inpTahsil', key: 'tahsil' },
+].forEach(({ id, key }) => {
+  const el = $(id);
+  el.addEventListener('focus', () => {
+    driver = key;
+  });
+  el.addEventListener('input', () => {
+    driver = key;
+    // Ondalık yazımında biçimleme atla
+    if (/[,]\d{0,2}$/.test(el.value) || el.value.endsWith(',')) { render(); return; }
+    const n = parseTR(el.value);
+    const caretEnd = el.selectionStart === el.value.length;
+    el.value = n ? fmtInput(n) : '';
+    if (caretEnd) el.setSelectionRange(el.value.length, el.value.length);
+    render();
+  });
+});
+
+// Oran alanları
+['kdvRate', 'stopajRate'].forEach((id) => $(id).addEventListener('input', render));
+attachMoneyFormat($('esik'));
+
+// Radio / checkbox değişimlerinde driver'ı sıfırlama — ödeyen türü veya tevkifat değişince
+// tahsil→net ilişkisi değiştiğinden driver'ı nil yaparak mevcut Net değeri üzerinden yeniden hesapla.
+document.querySelectorAll('input[name="payer"], input[name="hizmet"], #tevkifat').forEach((el) => {
+  el.addEventListener('change', () => {
+    // Driver korunur — kullanıcı son yazdığı alandan hesaplamak ister.
+    // Ancak eğer driver 'tahsil' ise yeniden hesapla (ödeyen değişince tahsil→net dönüşümü değişir).
+    render();
+  });
+});
+
+document.querySelectorAll('input[name="mode"]').forEach((el) => {
+  el.addEventListener('change', () => {
+    driver = null; // Mod değişince driver sıfırla
+    render();
+  });
+});
+
+// İlk render
+render();
+</script>
+</body>
+</html>
