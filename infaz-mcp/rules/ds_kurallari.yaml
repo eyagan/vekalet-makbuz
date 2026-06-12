@@ -1,0 +1,77 @@
+# Denetimli serbestlik (DS) kuralları
+# Kaynak: 5275 md. 105/A + geçici md. 6, 10, 11 birebir metinleri
+# (mevzuat.gov.tr, 12.06.2026 doğrulaması)
+
+surum: "2026-06-12"
+son_dogrulama: "2026-06-12"
+
+temel:
+  dayanak: "5275 md. 105/A-1 (7242)"
+  sure_yil: 1
+  sartlar:
+    - "açık ceza infaz kurumunda veya çocuk eğitimevinde bulunmak"
+    - "iyi hâlli olmak"
+    - "hükümlünün talebi + infaz hâkimi kararı"
+
+# 7550 (4.6.2025) eklemesi: KS'ye kadar kurumda geçirilmesi gereken sürenin
+# en az 1/10'u (5 günden az olmamak üzere) kurumda geçirilmiş olmalı.
+# Geçici md. 11: bu şart 4.6.2025'ten ÖNCE işlenen suçlara UYGULANMAZ.
+onda_bir_sarti:
+  dayanak: "5275 md. 105/A-1 son cümle (7550) + geçici md. 11"
+  suc_tarihi_baslangic: "2025-06-04"
+  oran: "1/10"
+  min_gun: 5
+
+# Geçici md. 6 (671 KHK + 6757 + 7242): 30.03.2020'ye kadar işlenen
+# suçlarda 105/A'daki "bir yıl" "üç yıl" olarak uygulanır.
+# NOT: KS oranlarını DEĞİŞTİRMEZ; yalnız DS süresini uzatır.
+gecici6:
+  dayanak: "5275 geçici md. 6/1, 6/3"
+  suc_tarihi_bitis: "2020-03-30"
+  sure_yil: 3
+  kapali_kurumda_da_uygulanir: true   # geçici md. 6/3 (iyi hâl şartıyla)
+  istisna_kategorileri:               # bu suçlarda DS 1 yıl kalır
+    - kasten_oldurme                  # TCK 81, 82, 83
+    - aile_savunmasiz_yaralama        # üstsoy/altsoy/eş/kardeş/savunmasıza kasten yaralama + ağırlaşmış
+    - m87_2d_yaralama                 # TCK 87/2-d
+    - iskence_eziyet                  # TCK 94, 95, 96
+    - cinsel_dokunulmazlik            # TCK 102, 103, 104, 105
+    - ozel_hayat                      # TCK 132-138
+    - uyusturucu_imal_ticaret         # TCK 188
+    - devlet_guvenligi                # TCK İkinci Kitap 4. Kısım 4-7. Bölümler
+    - teror                           # 3713 kapsamı
+
+# Geçici md. 10/6 (7456 + 7571/11. Yargı Paketi): 31.07.2023 ve öncesi suçlar.
+# KS oranlarını DEĞİŞTİRMEZ. İki kolaylık:
+#  (a) kapalıdakiler: toplam ceza <10 yıl → 1 ay, ≥10 yıl → 3 ay kapalıda
+#      geçirip açığa ayrılmasına ≤3 yıl kalanlar açığa ayrılabilir;
+#  (b) açıktakiler: en az 3 ay açık kurumda kalmak şartıyla DS'den
+#      3 yıl erken yararlanır.
+gecici10:
+  dayanak: "5275 geçici md. 10/6 (7571 ile değişik); 10/7-8 mülga"
+  suc_tarihi_bitis: "2023-07-31"
+  ds_erken_yil: 3
+  acik_kurum_min_ay: 3
+  kapali_min_ay:
+    toplam_ceza_10_yildan_az: 1
+    toplam_ceza_10_yil_ve_ustu: 3
+  acige_ayrilmaya_kalan_max_yil: 3
+  istisna_kategorileri:
+    - k82_1def_oldurme                # TCK 82/1 (d)(e)(f): alt/üstsoy-eş-kardeş, çocuk/savunmasız, kadına karşı
+    - deprem_oldurme                  # deprem nedeniyle yapı yıkılması/çökmesi sonucu öldürme
+    - cinsel_102_103_104_23           # TCK 102, 103, 104/2-3
+    - devlet_guvenligi
+    - teror
+    - orgut_faaliyeti
+
+ozel_durumlar:
+  kadin_0_6_yas_cocuk:
+    dayanak: "5275 md. 105/A-3a; geçici md. 6/2-a"
+    sure_yil: 2
+    gecici6_sure_yil: 4               # 30.03.2020 öncesi suçlarda (70+ yaş dahil)
+  agir_hastalik_engellilik_kocama:
+    dayanak: "5275 md. 105/A-3b; geçici md. 6/2-b"
+    sure_yil: 3
+    gecici6_65_yas_ustu_sinirsiz: true
+
+adli_para_cevrilen_yararlanamaz: true   # md. 105/A-4

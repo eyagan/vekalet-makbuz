@@ -1,0 +1,200 @@
+# TCK madde/fıkra → infaz kategorisi eşleme tablosu
+# Kaynak: 5275 md. 107/2 a-h, md. 107/4, md. 108/9, geçici md. 6/1, 10/6
+# Eşleşme bulunamazsa araç TAHMİN ETMEZ; olası kategorileri kullanıcıya sorar.
+#
+# Alanlar:
+#   madde: TCK madde no (string; "82/1-d" gibi fıkra/bent gösterimi destekli)
+#   ks_kategori: oranlar.yaml'daki KS oran kategorisi
+#   cocuk_ks_kategori: fail çocuksa farklı kategori (md. 107/2-e, g)
+#   gecici6_istisna / gecici10_istisna: ilgili geçici madde kolaylığından yararlanamaz
+
+surum: "2026-06-12"
+
+esleme:
+  # --- Kasten öldürme (md. 107/2-a) ---
+  - madde: "81"
+    ad: "Kasten öldürme"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "82"
+    ad: "Nitelikli kasten öldürme"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    not: "82/1 (d)(e)(f) bentleri ayrıca geçici 10 istisnasıdır"
+  - madde: "82/1-d"
+    ad: "Üstsoy-altsoy-eş-boşandığı eş-kardeşe karşı kasten öldürme"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    gecici10_istisna: true
+  - madde: "82/1-e"
+    ad: "Çocuğa/savunmasıza karşı kasten öldürme"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    gecici10_istisna: true
+  - madde: "82/1-f"
+    ad: "Kadına karşı kasten öldürme"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    gecici10_istisna: true
+  - madde: "83"
+    ad: "İhmali davranışla kasten öldürme"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+
+  # --- Yaralama ---
+  - madde: "87/2-d"
+    ad: "Neticesi sebebiyle ağırlaşmış yaralama (yüzde sabit eser/duyu-organ kaybı vb.)"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "86"
+    ad: "Kasten yaralama (basit)"
+    ks_kategori: genel
+    not: "Üstsoy/altsoy/eş/kardeş/savunmasıza karşı ise geçici 6 istisnası (geçici md. 6/1)"
+
+  # --- İşkence / eziyet (md. 107/2-c) ---
+  - madde: "94"
+    ad: "İşkence"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "95"
+    ad: "Neticesi sebebiyle ağırlaşmış işkence"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "96"
+    ad: "Eziyet"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+
+  # --- Cinsel dokunulmazlığa karşı suçlar ---
+  # md. 107/2-d: 102 (2. fıkra hariç), 104 (2-3. fıkra hariç), 105 → 2/3
+  # md. 108/9: 102/2, 103, 104/2-3 → 3/4 (28.06.2014 sonrası; öncesi 2/3 — geçici 9/4)
+  # Çocuk fail: md. 107/2-e → 2/3
+  - madde: "102/1"
+    ad: "Cinsel saldırı (basit)"
+    ks_kategori: m107_2_listesi
+    cocuk_ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    gecici10_istisna: true
+  - madde: "102/2"
+    ad: "Nitelikli cinsel saldırı"
+    ks_kategori: m108_9_listesi
+    cocuk_ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    gecici10_istisna: true
+  - madde: "103"
+    ad: "Çocuğun cinsel istismarı"
+    ks_kategori: m108_9_listesi
+    cocuk_ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    gecici10_istisna: true
+  - madde: "104/1"
+    ad: "Reşit olmayanla cinsel ilişki (basit)"
+    ks_kategori: m107_2_listesi
+    cocuk_ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "104/2"
+    ad: "Reşit olmayanla cinsel ilişki (nitelikli)"
+    ks_kategori: m108_9_listesi
+    cocuk_ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    gecici10_istisna: true
+  - madde: "104/3"
+    ad: "Reşit olmayanla cinsel ilişki (nitelikli)"
+    ks_kategori: m108_9_listesi
+    cocuk_ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    gecici10_istisna: true
+  - madde: "105"
+    ad: "Cinsel taciz"
+    ks_kategori: m107_2_listesi
+    cocuk_ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+
+  # --- Özel hayata karşı suçlar (md. 107/2-f) ---
+  - madde: "132"
+    ad: "Haberleşmenin gizliliğini ihlal"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "133"
+    ad: "Kişiler arasındaki konuşmaların dinlenmesi/kayda alınması"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "134"
+    ad: "Özel hayatın gizliliğini ihlal"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "135"
+    ad: "Kişisel verilerin kaydedilmesi"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "136"
+    ad: "Verileri hukuka aykırı verme/ele geçirme"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "137"
+    ad: "Nitelikli hâller (özel hayat)"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+  - madde: "138"
+    ad: "Verileri yok etmeme"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+
+  # --- Uyuşturucu (yetişkin: md. 108/9 → 3/4; çocuk: md. 107/2-g → 2/3) ---
+  - madde: "188"
+    ad: "Uyuşturucu veya uyarıcı madde imal ve ticareti"
+    ks_kategori: m108_9_listesi
+    cocuk_ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+
+  # --- Casusluk / devlet sırları (md. 107/2-h) ---
+  - madde: "326-339"
+    ad: "Devlet sırlarına karşı suçlar ve casusluk"
+    ks_kategori: m107_2_listesi
+    gecici6_istisna: true
+    gecici10_istisna: true
+
+  # --- Sık karşılaşılan genel kategori örnekleri ---
+  - madde: "106"
+    ad: "Tehdit"
+    ks_kategori: genel
+  - madde: "141"
+    ad: "Hırsızlık (basit)"
+    ks_kategori: genel
+  - madde: "142"
+    ad: "Nitelikli hırsızlık"
+    ks_kategori: genel
+  - madde: "148"
+    ad: "Yağma"
+    ks_kategori: genel
+  - madde: "149"
+    ad: "Nitelikli yağma"
+    ks_kategori: genel
+  - madde: "157"
+    ad: "Dolandırıcılık"
+    ks_kategori: genel
+  - madde: "158"
+    ad: "Nitelikli dolandırıcılık"
+    ks_kategori: genel
+  - madde: "179"
+    ad: "Trafik güvenliğini tehlikeye sokma"
+    ks_kategori: genel
+  - madde: "191"
+    ad: "Kullanmak için uyuşturucu madde satın alma/bulundurma"
+    ks_kategori: genel
+    not: "DS döneminde zorunlu tedavi/rehabilitasyon yükümlülüğü — md. 105/A-5 (7445)"
+
+# Bayrakla (kategori yerine girdi alanıyla) belirlenenler:
+bayrak_kurallari:
+  orgut_kapsaminda:
+    ks_kategori: orgutlu
+    gecici6_istisna_degil: true       # geçici 6 listesinde örgüt bayrağı yok; devlet güvenliği/teror hariç
+    gecici10_istisna: true            # "örgüt faaliyeti kapsamında işlenen suçlar"
+  teror_kapsaminda:
+    ks_kategori: teror
+    gecici6_istisna: true
+    gecici10_istisna: true
+  devlet_guvenligi_bolumleri:
+    aciklama: "TCK İkinci Kitap 4. Kısım 4-7. Bölümler (madde 302-339 ve ilgili)"
+    gecici6_istisna: true
+    gecici10_istisna: true
