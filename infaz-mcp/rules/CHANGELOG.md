@@ -19,3 +19,15 @@ TCK md. 61, 3713 md. 17, 2324 sayılı CB Yönetmeliği md. 54.
 
 Doğrulayan: Claude Code oturumu (geçici maddelerin birebir metinleri tam
 metin chunk'larından alındı); insan teyidi MacBook Faz 1 kabulünde yapılacak.
+
+## 2026-06-12 — Faz 2 + Faz 3 (motor ve MCP katmanı)
+
+Kural verisinde değişiklik yok. Eklenenler:
+- engine.py: TCK 61/6 aritmetiğiyle KS/DS/bihakkın hesabı, dört eşikli rejim
+  seçimi (geçici 6 / geçici 10 / 1-10 şartı / m108-9 tarih eşiği), aralıklı
+  mahsup, geçici 6+10 kümülasyonunda uyarı.
+- 17 golden test (test_engine.py) + 5 sunucu duman testi.
+- server.py: infaz_hesapla, muddetname_taslagi, kategori_bul, kural_listesi.
+
+Yöntem (yıl=365/ay=30, kesir atılır) PROVISIONAL; Faz 5'te gerçek müddetname
+ile birebir doğrulanacak.
