@@ -1,0 +1,86 @@
+# Koşullu salıverilme (KS) oranları ve sabit süreler
+# Kaynak: 5275 sayılı Kanun tam metni, mevzuat.gov.tr (12.06.2026 doğrulaması)
+# Tarih alanları suç tarihine göre uygulanır; alan yoksa tüm suç tarihleri.
+
+surum: "2026-06-12"
+son_dogrulama: "2026-06-12"
+kaynak: "mevzuat.gov.tr — 5275 tam metin + TCK md. 61 + 3713 md. 17"
+
+ks_oranlari:
+  - kategori: genel
+    oran: "1/2"
+    dayanak: "5275 md. 107/2 (7242 ile değişik)"
+
+  - kategori: m107_2_listesi
+    oran: "2/3"
+    dayanak: "5275 md. 107/2 a-h (7242)"
+
+  - kategori: orgutlu
+    oran: "2/3"
+    dayanak: "5275 md. 107/4"
+
+  - kategori: teror
+    oran: "3/4"
+    dayanak: "3713 md. 17"
+
+  # Nitelikli cinsel suçlar (TCK 102/2, 103, 104/2-3) ve uyuşturucu
+  # imal/ticareti (TCK 188, yetişkin fail) — md. 108/9 yollaması.
+  # Suç 28.06.2014 (6545 yürürlüğü) öncesiyse geçici md. 9/4 ile 2/3.
+  - kategori: m108_9_listesi
+    oran: "3/4"
+    dayanak: "5275 md. 108/9 (6545 + 7242)"
+    yururluk:
+      suc_tarihi_baslangic: "2014-06-28"
+
+  - kategori: m108_9_listesi
+    oran: "2/3"
+    dayanak: "5275 geçici md. 9/4 (7242)"
+    yururluk:
+      suc_tarihi_bitis: "2014-06-27"
+
+  - kategori: mukerrir
+    oran: "2/3"
+    dayanak: "5275 md. 108/1-d (7242)"
+
+  - kategori: mukerrir_ikinci
+    oran: "3/4"
+    dayanak: "5275 md. 108/3 (7550)"
+
+sabit_sureler_yil:
+  muebbet: 24                        # md. 107/2
+  agirlastirilmis_muebbet: 30        # md. 107/2
+  orgutlu_muebbet: 30                # md. 107/4
+  orgutlu_agirlastirilmis_muebbet: 36
+  mukerrir_muebbet: 33               # md. 108/1-b
+  mukerrir_agirlastirilmis_muebbet: 39
+
+coklu_mahkumiyet_ust_sinirlari_yil:  # md. 107/3 (genel) / 107/4 (örgütlü), md. 108/1-c (mükerrir)
+  genel:
+    birden_fazla_agirlastirilmis_veya_karma: 36
+    birden_fazla_muebbet: 30
+    agirlastirilmis_ve_sureli: 36
+    muebbet_ve_sureli: 30
+    birden_fazla_sureli: 28
+  orgutlu:
+    birden_fazla_agirlastirilmis_veya_karma: 40
+    birden_fazla_muebbet: 34
+    agirlastirilmis_ve_sureli: 40
+    muebbet_ve_sureli: 34
+    birden_fazla_sureli: 32
+  mukerrir:
+    birden_fazla_sureli: 32
+
+yas_katlama:
+  # KS süresi hesabında kurumda geçirilen 1 günün kaç gün sayılacağı
+  genel:
+    dayanak: "5275 md. 107/5"
+    on_bes_yas_alti_carpan: 2
+  gecici6:
+    dayanak: "5275 geçici md. 6/4"
+    suc_tarihi_bitis: "2020-03-30"
+    on_bes_yas_alti_carpan: 3
+    on_sekiz_yas_alti_carpan: 2
+
+denetim_suresi:
+  dayanak: "5275 md. 107/6 (7242)"
+  kural: "kurumda geçirilmesi gereken süre kadar; süreli hapiste bihakkın tarihini geçemez"
